@@ -6,7 +6,7 @@ on:
     types: [ released, edited ]
 jobs:
   deploy-on-latest:
-    if: (github.event.action == 'edited' && github.event.changes.make_latest == true) || github.event.action == 'released'
+    if: (github.event.action == 'edited' && github.event.changes.make_latest.to == true) || github.event.action == 'released'
     runs-on: ubuntu-latest
     steps:
       - run: echo '${{toJSON(github.event)}}'
