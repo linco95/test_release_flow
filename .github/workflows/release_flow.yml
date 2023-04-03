@@ -4,32 +4,27 @@ on:
     tags:
      - v*
     types: [ released, edited ]
-#    if: (github.event.action == 'edited' && github.event.changes.make_latest) || github.event.action == 'released' || (github.event.action == 'published' && !github.event.release.prerelease)
+    if: (github.event.action == 'edited' && github.event.changes.make_latest) || github.event.action == 'released'
 jobs:
-  trigger-circleci:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo '${{ toJSON(github) }}'
-  logLatestRelease:
+  deploy-on-latest:
     runs-on: ubuntu-latest
     steps:
       - uses: octokit/graphql-action@v2.x
         id: get_latest_release
         with:
           query: |
-            query release($owner:String!,$repo:String!,$tag:String!) {
-              repository(owner:$owner,name:$repo) {
-                release(tagName:$tag) {
+            query release($OWNER:String!,$REPO:String!,$TAG:String!) {
+              repository(owner:$OWNER,name:$REPO) {
+                release(tagName:$TAG) {
                   isLatest
                 }
               }
             }
-          owner: ${{ github.event.repository.owner.login }}
-          repo: ${{ github.event.repository.name }}
-          tag: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: "echo 'latest release: ${{ steps.get_latest_release.outputs.data }}'"
+          OWNER: ${{ github.event.repository.owner.login }}
+          REPO: ${{ github.event.repository.name }}
+          TAG: ${{ github.event.release.tag_name }}
       - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
         run: echo "This is the latest release, i.e. we should deploy it."
       - if: ${{ !fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
