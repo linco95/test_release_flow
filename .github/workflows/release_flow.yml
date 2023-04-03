@@ -22,10 +22,6 @@ jobs:
                 releases(first:1) {
                   nodes {
                     databaseId
-                    name
-                    createdAt
-                    tagName
-                    description
                   }
                 }
               }
@@ -35,5 +31,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: "echo 'latest release: ${{ steps.get_latest_release.outputs.data }}'"
-      - if: ${{ steps.get_latest_release.outputs.data.databaseId == github.event.release.id }}
+      - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.releases.nodes[0].databaseId == github.event.release.id }}
         run: echo "This is the latest release, i.e. we should deploy it."
+      - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.releases.nodes[0].databaseId != github.event.release.id }}
+        run: echo "This is not the latest release, i.e. we should not deploy it."
