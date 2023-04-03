@@ -23,6 +23,7 @@ jobs:
                   nodes {
                     id
                     name
+                    url
                     createdAt
                     tagName
                     description
@@ -35,5 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: "echo 'latest release: ${{ steps.get_latest_release.outputs.data }}'"
-      - if: ${{ steps.get_latest_release.outputs.data.id == github.event.release.id }}
+      - if: ${{ steps.get_latest_release.outputs.data.url == github.event.release.url }}
         run: echo "This is the latest release, i.e. we should deploy it."
+      - if: ${{ steps.get_latest_release.outputs.data.id != github.event.release.id }}
+        run: echo "This is not the latest release, i.e. we should not deploy it." && exit 1
