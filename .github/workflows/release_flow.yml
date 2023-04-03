@@ -3,10 +3,37 @@ on:
   release:
     tags:
      - v*
-    types: [ released, published, edited ]
+    types: [ released, edited ]
 #    if: (github.event.action == 'edited' && github.event.changes.make_latest) || github.event.action == 'released' || (github.event.action == 'published' && !github.event.release.prerelease)
 jobs:
   trigger-circleci:
     runs-on: ubuntu-latest
     steps:
       - run: echo '${{ toJSON(github) }}'
+  logLatestRelease:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: get_latest_release
+        with:
+          query: |
+            query release($owner:String!,$repo:String!) {
+              repository(owner:$owner,name:$repo) {
+                releases(first:1) {
+                  nodes {
+                    id
+                    name
+                    createdAt
+                    tagName
+                    description
+                  }
+                }
+              }
+            }
+          owner: ${{ github.event.repository.owner.name }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: "echo 'latest release: ${{ steps.get_latest_release.outputs.data }}'"
+      - if: ${{ steps.get_latest_release.outputs.data.id == github.event.release.id }}
+        run: echo "This is the latest release, i.e. we should deploy it."
