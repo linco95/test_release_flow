@@ -1,0 +1,12 @@
+name: Deploy to production
+on:
+  release:
+    tags:
+     - v*
+    types: [ released, published, edited ]
+#    if: (github.event.action == 'edited' && github.event.changes.make_latest) || github.event.action == 'released' || (github.event.action == 'published' && !github.event.release.prerelease)
+jobs:
+  trigger-circleci:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ toJSON(github) }}
