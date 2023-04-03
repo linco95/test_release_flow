@@ -27,6 +27,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Export isLatest as env var
         run: echo "IS_LATEST_RELEASE=${{ fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest }}" >> $GITHUB_ENV
+      - run: echo "IS_LATEST_RELEASE=${{ env.IS_LATEST_RELEASE }}"
+      - run: echo "${IS_LATEST_RELEASE}"
       - if: env.IS_LATEST_RELEASE
         run: echo "This is the latest release, i.e. we should deploy it."
       - if: (!env.IS_LATEST_RELEASE)
