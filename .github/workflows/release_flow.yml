@@ -33,4 +33,4 @@ jobs:
       - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
         run: echo "This is the latest release, i.e. we should deploy it."
       - if: ${{ !fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
-        run: echo "This is not the latest release, i.e. we should not deploy it."
+        run: echo "This is not the latest release, i.e. we should not deploy it." && exit 1
