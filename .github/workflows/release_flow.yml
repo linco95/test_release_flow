@@ -6,12 +6,12 @@ on:
     types: [ released, edited ]
 jobs:
   deploy-on-latest:
-    if: (github.event.action == 'edited' && github.event.changes.make_latest.to == true) || github.event.action == 'released'
+#    if: (github.event.action == 'edited' && github.event.changes.make_latest.to == true) || github.event.action == 'released'
     runs-on: ubuntu-latest
     steps:
       - run: echo '${{toJSON(github.event)}}'
       - run: echo '${{github.event.action == 'edited'}}'
-      - run: echo '${{github.event.changes.make_latest == true}}'
+      - run: echo '${{github.event.changes.make_latest.to == true}}'
       - run: echo '${{github.event.action == 'released'}}'
       - uses: octokit/graphql-action@v2.x
         id: get_latest_release
