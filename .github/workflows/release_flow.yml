@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo '${{toJSON(github.event)}}'
+      - run: echo '${{github.event.action == 'edited'}}'
+      - run: echo '${{github.event.changes.make_latest == true}}'
+      - run: echo '${{github.event.action == 'released'}}'
       - uses: octokit/graphql-action@v2.x
         id: get_latest_release
         with:
