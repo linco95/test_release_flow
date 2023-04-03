@@ -4,9 +4,9 @@ on:
     tags:
      - v*
     types: [ released, edited ]
-    if: (github.event.action == 'edited' && github.event.changes.make_latest == true) || github.event.action == 'released'
 jobs:
   deploy-on-latest:
+    if: (github.event.action == 'edited' && github.event.changes.make_latest == true) || github.event.action == 'released'
     runs-on: ubuntu-latest
     steps:
       - run: echo '${{toJSON(github.event)}}'
