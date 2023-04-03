@@ -17,24 +17,20 @@ jobs:
         id: get_latest_release
         with:
           query: |
-            query release($owner:String!,$repo:String!) {
+            query release($owner:String!,$repo:String!,$tag:String!) {
               repository(owner:$owner,name:$repo) {
-                releases(first:1) {
-                  nodes {
-                    databaseId
-                    tag
-                  }
+                release(tagName:$tag) {
+                  isLatest
                 }
               }
             }
           owner: ${{ github.event.repository.owner.login }}
           repo: ${{ github.event.repository.name }}
+          tag: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: "echo 'latest release: ${{ steps.get_latest_release.outputs.data }}'"
-      - run: "echo 'latest release: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.releases.nodes[0].databaseId }}'"
-      - run: "echo 'current release: ${{ github.event.release.id}}'"
-      - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.releases.nodes[0].databaseId == github.event.release.id }}
+      - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
         run: echo "This is the latest release, i.e. we should deploy it."
-      - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.releases.nodes[0].databaseId != github.event.release.id }}
+      - if: ${{ !fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
         run: echo "This is not the latest release, i.e. we should not deploy it."
