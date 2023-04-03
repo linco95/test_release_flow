@@ -6,13 +6,9 @@ on:
     types: [ released, edited ]
 jobs:
   deploy-on-latest:
-#    if: (github.event.action == 'edited' && github.event.changes.make_latest.to) || github.event.action == 'released'
+    if: (github.event.action == 'edited' && github.event.changes.make_latest.to) || github.event.action == 'released'
     runs-on: ubuntu-latest
     steps:
-      - run: echo '${{toJSON(github.event)}}'
-      - run: echo '${{github.event.action == 'edited'}}'
-      - run: echo '${{true && github.event.changes.make_latest.to}}'
-      - run: echo '${{github.event.action == 'released'}}'
       - uses: octokit/graphql-action@v2.x
         id: get_latest_release
         with:
@@ -29,10 +25,11 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - if: ${{ fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
+      - name: Export isLatest as env var
+        run: echo "IS_LATEST_RELEASE=${{ fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest }}" >> $GITHUB_ENV
+      - if: env.IS_LATEST_RELEASE
         run: echo "This is the latest release, i.e. we should deploy it."
-      - if: ${{ !fromJSON(steps.get_latest_release.outputs.data).repository.release.isLatest}}
+      - if: (!env.IS_LATEST_RELEASE)
         run: |
           echo "::error file=release_flow.yml::This is not the latest release, i.e. we should not deploy it."
           exit 1
